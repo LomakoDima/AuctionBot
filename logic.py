@@ -79,6 +79,25 @@ class DatabaseManager:
 
     def get_random_prize(self):
         return cur.fetchall()[0]
+
+    def get_winners_count(self, prize_id):
+        conn = sqlite3.connect(self.database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute('SELECT INNER JOIN winners ON movies.director_id = directors.id', (prize_id,))
+            return cur.fetchall()[0][0]
+
+    def get_rating(self):
+        conn = sqlite3.connect(self.database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute('''
+    SELECT users.user_names, COUNT(winners.prize.id) AS count_prize FROM winners 
+    INNER JOIN users ON users.user_names = winners.users_id 
+    GROUP BY winners.users_id ORDER BY count_prize
+    LIMIT 10 
+    ''')
+            return cur.fetchall()
     
   
 def hide_img(img_name):
